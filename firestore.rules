@@ -1,6 +1,9 @@
 rules_version = '2';
 
 service cloud.firestore {
+  function isEmailVerified() {
+    return request.auth.token.email_verified
+  }
   match /databases/{database}/documents {
     match /users/{userId}/{document=**} {
       allow read;

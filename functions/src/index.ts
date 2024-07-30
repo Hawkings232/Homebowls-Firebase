@@ -1,22 +1,27 @@
 /**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
+    __ __                  __                __          ____ _            __                
+   / // /___   __ _  ___  / /  ___  _    __ / /___ ____ / __/(_)____ ___  / /  ___ _ ___ ___ 
+  / _  // _ \ /  ' \/ -_)/ _ \/ _ \| |/|/ // /(_-</___// _/ / // __// -_)/ _ \/ _ `/(_-</ -_)
+ /_//_/ \___//_/_/_/\__//_.__/\___/|__,__//_//___/    /_/  /_//_/   \__//_.__/\_,_//___/\__/
+
+ * This is the entry point for the Firebase Functions.
+ * Follow documentation for more information.
+ * V1.0.0A
  */
 
 import admin from "firebase-admin";
-import { createCustomerPaymentSession, checkoutCompleted } from "./payment";
 
 admin.initializeApp();
-export { createCustomerPaymentSession, checkoutCompleted };
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+import { createCustomerPaymentSession, checkoutCompleted } from "./payment";
+import { updateStore } from "./store";
+import { onCreateNewUser, updateUser, onUserDelete } from "./user";
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+export {
+    createCustomerPaymentSession,
+    checkoutCompleted,
+    updateStore,
+    onCreateNewUser,
+    onUserDelete,
+    updateUser,
+};

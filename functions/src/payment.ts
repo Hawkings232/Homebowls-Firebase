@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { onRequest } from "firebase-functions/v2/https";
 import { log, error as logError } from "firebase-functions/logger";
 import { firestore } from "firebase-admin";
-import { auth } from "firebase-functions";
+import { MenuItem } from "./store";
 
 const stripe: Stripe = new Stripe(process.env.STRIPE_SECRET || "", {
     apiVersion: "2024-06-20",
@@ -11,8 +11,8 @@ const stripe: Stripe = new Stripe(process.env.STRIPE_SECRET || "", {
 const store = firestore();
 
 export interface CartItem {
-    storeid: string;
-    uuid: string;
+    store_reference_id: string;
+    uid: string;
     quantity: number;
 }
 
@@ -21,20 +21,21 @@ export interface CustomerPaymentSessionRequest {
 }
 
 export interface OrderProcessingData {
-    storeid: string;
-    uuid: string;
+    store_reference_id: string;
+    uid: string;
     quantity: number;
 }
 
 async function fulfillCustomerOrder(sessionId: string) {
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    //const session = await stripe.checkout.sessions.retrieve(sessionId);
     const lineItems = await stripe.checkout.sessions.listLineItems(sessionId);
 
     const items: Array<OrderProcessingData> = lineItems.data.map(
         (item: Stripe.LineItem) => {
             return {
-                storeid: item?.price?.metadata.storeid || "",
-                uuid: item?.price?.metadata.foodid || "",
+                store_reference_id:
+                    item?.price?.metadata.store_reference_id || "",
+                uid: item?.price?.metadata.foodid || "",
                 quantity: item.quantity || 0,
             };
         }
@@ -43,29 +44,31 @@ async function fulfillCustomerOrder(sessionId: string) {
     for (const item of items) {
         const storeDoc = await store
             .collection("stores")
-            .doc(item.storeid)
+            .doc(item.store_reference_id)
             .get();
         if (!storeDoc.exists) {
             logError("[Homebowls-Firebase]: Store not found", {
-                storeid: item.storeid,
+                store_reference_id: item.store_reference_id,
             });
             return;
         }
 
-        const foodItem = storeDoc.data()?.menuItems.find((element: any) => {
-            return element.name == item.uuid;
-        });
+        const foodItem = storeDoc
+            .data()
+            ?.menuItems.find((element: MenuItem) => {
+                return element.name == item.uid;
+            });
 
         if (!foodItem) {
             logError("[Homebowls-Firebase]: Food item not found", {
-                foodid: item.uuid,
+                foodid: item.uid,
             });
             return;
         }
 
         const order = {
-            storeid: item.storeid,
-            foodid: item.uuid,
+            store_reference_id: item.store_reference_id,
+            foodid: item.uid,
             quantity: item.quantity,
             price: foodItem.price,
             status: "pending",
@@ -73,12 +76,13 @@ async function fulfillCustomerOrder(sessionId: string) {
 
         await store
             .collection("stores")
-            .doc(item.storeid)
+            .doc(item.store_reference_id)
             .update({
                 pendingOrders: firestore.FieldValue.arrayUnion(order),
             });
     }
 }
+
 export const createCustomerPaymentSession = onRequest(
     { timeoutSeconds: 120 },
     async (request, response) => {
@@ -89,10 +93,14 @@ export const createCustomerPaymentSession = onRequest(
                     []; // Create an empty array to store line items
                 for (const item of contents) {
                     // Iterate through each item in the contents array
-                    if (item.storeid && item.uuid && item.quantity > 1) {
+                    if (
+                        item.store_reference_id &&
+                        item.uid &&
+                        item.quantity > 1
+                    ) {
                         const doc = await store
                             .collection("stores")
-                            .doc(item.storeid)
+                            .doc(item.store_reference_id)
                             .get(); // Get the store document
                         if (!(await doc).exists) {
                             response
@@ -101,10 +109,10 @@ export const createCustomerPaymentSession = onRequest(
                             return;
                         }
 
-                        let foodItem = doc
+                        const foodItem = doc
                             ?.data()
-                            ?.menuItems.find((element: any) => {
-                                return element.name == item.uuid;
+                            ?.menuItems.find((element: MenuItem) => {
+                                return element.name == item.uid;
                             });
                         if (!foodItem) {
                             response
@@ -121,8 +129,9 @@ export const createCustomerPaymentSession = onRequest(
                                     name: foodItem.name,
                                     description: foodItem.description,
                                     metadata: {
-                                        storeid: item.storeid,
-                                        foodid: item.uuid,
+                                        store_reference_id:
+                                            item.store_reference_id,
+                                        foodid: item.uid,
                                     },
                                 },
                                 unit_amount_decimal: foodItem.price,
