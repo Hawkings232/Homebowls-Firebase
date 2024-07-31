@@ -1,54 +1,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { error as logError } from "firebase-functions/logger";
 import { firestore } from "firebase-admin";
-
-export interface SalesAnalytic {
-    name: string;
-    sales: number;
-}
-
-export interface ScheduledItem {
-    day: number;
-    item: MenuItem;
-}
-
-export interface Order {
-    order_id: string;
-    order_date: string;
-    order_time: string;
-    order_status: string;
-    order_items: MenuItem[];
-    order_total: number;
-}
-
-export interface MenuItem {
-    cuisine: string;
-    description: string;
-    dish_type: string;
-    name: string;
-    hidden: boolean;
-    price: number;
-    is_routine: boolean;
-    is_available: boolean;
-    imageURLS: string[];
-    restrictions: string[];
-}
-
-export interface StoreProperties {
-    store_name: string;
-    store_billing: {
-        address: string;
-        city: string;
-        state: string;
-        zip: string;
-        country: string;
-    };
-    store_settings: {
-        banner_dir: string;
-    };
-    menuItems: MenuItem[];
-    salesAnalytics: SalesAnalytic[];
-}
+import { StoreProperties } from "./types/storetypes";
 
 const store = firestore();
 

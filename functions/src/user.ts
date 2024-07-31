@@ -2,39 +2,12 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { error as logError } from "firebase-functions/logger";
 import { firestore } from "firebase-admin";
 import { auth } from "firebase-functions";
-import { StoreProperties } from "./store";
+import { StoreProperties } from "./types/storetypes";
+import { UserProperties } from "./types/usertypes";
+
 //import admin from "firebase-admin";
 
 const store = firestore();
-
-/**
- * Represents the properties of a user.
- */
-export interface UserProperties {
-    email: string;
-    name: string;
-    readonly uid: string;
-    account_type: string;
-    billing: {
-        address: string;
-        city: string;
-        state: string;
-        zip: string;
-        country: string;
-    };
-    stripe_id: string;
-    settings: {
-        fs: {
-            profile_image_dir: string;
-            cover_image_dir: string;
-        };
-        notifications: {
-            orders: boolean;
-            feedback: boolean;
-            promotions: boolean;
-        };
-    };
-}
 
 /**
  * Creates a userdata when a new Firebase authentication user is created.
