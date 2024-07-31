@@ -6,6 +6,7 @@ import { Timestamp } from "firebase-admin/firestore";
 export interface SalesAnalytic {
     name: string;
     sales: number;
+    revenue: number;
 }
 
 /**
