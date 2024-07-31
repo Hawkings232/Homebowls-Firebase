@@ -79,10 +79,10 @@ export const updateStore = onCall(async (request) => {
 
         const currentStoreData = currentStoreDoc.data() as StoreProperties;
 
-        const updatedStore: StoreProperties = Object.assign(
-            currentStoreData,
-            request.data.updatedProperties
-        );
+        const updatedStore: StoreProperties = {
+            ...currentStoreData,
+            ...request.data.updatedProperties,
+        };
 
         await propertySecurityMeasures(updatedStore);
 
