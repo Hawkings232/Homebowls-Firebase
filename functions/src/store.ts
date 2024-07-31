@@ -1,6 +1,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { error as logError } from "firebase-functions/logger";
 import { firestore } from "firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
 
 export interface SalesAnalytic {
     name: string;
@@ -32,6 +33,7 @@ export interface MenuItem {
     is_available: boolean;
     imageURLS: string[];
     restrictions: string[];
+    id: string;
 }
 
 export interface StoreProperties {
@@ -48,6 +50,16 @@ export interface StoreProperties {
     };
     menuItems: MenuItem[];
     salesAnalytics: SalesAnalytic[];
+    schedule: {
+        specialty: {
+            date: Timestamp;
+            item_id: string;
+        }[];
+        routine: {
+            day: number;
+            item_id: string;
+        }[];
+    }
 }
 
 const store = firestore();
@@ -59,9 +71,11 @@ async function propertySecurityMeasures(updatedStore: StoreProperties) {
             "Cannot update salesAnalytics."
         );
     }
+    /*
     if (updatedStore.menuItems !== undefined) {
         throw new HttpsError("invalid-argument", "Cannot update menuItems.");
     }
+    */
 }
 
 export const updateStore = onCall(async (request) => {
@@ -84,7 +98,7 @@ export const updateStore = onCall(async (request) => {
             ...request.data.updatedProperties,
         };
 
-        await propertySecurityMeasures(updatedStore);
+        await propertySecurityMeasures(request.data.updatedProperties);
 
         await store
             .collection("stores")
