@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase-admin/firestore";
+
 /**
  * Represents a sales analytic object.
  */
@@ -93,6 +95,10 @@ export interface MenuItem {
      * The restrictions of the menu item.
      */
     restrictions: string[];
+    /**
+     * The unique ID of this item
+     */
+    id: string;
 }
 
 /**
@@ -153,4 +159,18 @@ export interface StoreProperties {
      * The sales analytics of the store.
      */
     salesAnalytics: SalesAnalytic[];
+
+    /**
+     * Scheduled items
+     */
+    schedule: {
+        specialty: {
+            date: Timestamp;
+            item_id: string;
+        }[];
+        routine: {
+            day: number;
+            item_id: string;
+        }[];
+    }
 }

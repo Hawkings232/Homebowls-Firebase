@@ -12,9 +12,11 @@ async function propertySecurityMeasures(updatedStore: StoreProperties) {
             "Cannot update salesAnalytics."
         );
     }
+    /*
     if (updatedStore.menuItems !== undefined) {
         throw new HttpsError("invalid-argument", "Cannot update menuItems.");
     }
+    */
 }
 
 export const updateStore = onCall(async (request) => {
@@ -37,7 +39,7 @@ export const updateStore = onCall(async (request) => {
             ...request.data.updatedProperties,
         };
 
-        await propertySecurityMeasures(updatedStore);
+        await propertySecurityMeasures(request.data.updatedProperties);
 
         await store
             .collection("stores")
