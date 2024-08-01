@@ -1,3 +1,22 @@
+import { StripeAccountProperties } from "./stripetypes";
+/**
+ * Represents the account type of a user.
+ */
+export enum AccountType {
+    /**
+     * Represents customer account type.
+     */
+    Customer = "customer",
+    /**
+     * Represents seller account type.
+     */
+    Chef = "chef",
+    /**
+     * Represents None account type.
+     */
+    None = "none",
+}
+
 /**
  * Represents the properties of a user.
  */
@@ -11,13 +30,9 @@ export interface UserProperties {
      */
     name: string;
     /**
-     * The unique identifier of the user (read-only).
-     */
-    readonly uid: string;
-    /**
      * The account type of the user.
      */
-    account_type: string;
+    account_type: AccountType;
     /**
      * The billing information of the user.
      */
@@ -43,10 +58,6 @@ export interface UserProperties {
          */
         country: string;
     };
-    /**
-     * The Stripe ID of the user.
-     */
-    stripe_id: string;
     /**
      * The settings of the user.
      */
@@ -81,5 +92,19 @@ export interface UserProperties {
              */
             promotions: boolean;
         };
+    };
+
+    /**
+     * The immutable properties of the user. ON (CLIENT-SIDE)
+     */
+    immutable: {
+        /**
+         * The unique identifier of the user (read-only).
+         */
+        uid: string;
+        /**
+         * The Stripe properties of the user (read-only).
+         */
+        stripe_properties: StripeAccountProperties;
     };
 }

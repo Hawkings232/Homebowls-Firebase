@@ -3,9 +3,8 @@ import { error as logError } from "firebase-functions/logger";
 import { firestore } from "firebase-admin";
 import { auth } from "firebase-functions";
 import { StoreProperties } from "./types/storetypes";
-import { UserProperties } from "./types/usertypes";
-
-//import admin from "firebase-admin";
+import { UserProperties, AccountType } from "./types/usertypes";
+import { stripe, StripeController } from "./controllers/stripeController";
 
 const store = firestore();
 
@@ -30,13 +29,16 @@ export const onCreateNewUser = auth.user().onCreate(async (user) => {
             },
             menuItems: [],
             salesAnalytics: [],
+            schedule: {
+                specialty: [],
+                routine: [],
+            },
         };
 
         const userProperties: UserProperties = {
             email: user.email || "",
             name: user.displayName || "John Doe",
-            uid: user.uid,
-            account_type: "customer",
+            account_type: AccountType.None,
             billing: {
                 address: "",
                 city: "",
@@ -44,7 +46,15 @@ export const onCreateNewUser = auth.user().onCreate(async (user) => {
                 zip: "",
                 country: "",
             },
-            stripe_id: "NONE",
+            immutable: {
+                uid: user.uid,
+                stripe_properties: {
+                    stripe_id: AccountType.None,
+                    charges_enabled: false,
+                    details_submitted: false,
+                    payouts_enabled: false,
+                },
+            },
             settings: {
                 fs: {
                     profile_image_dir: user.photoURL || "",
@@ -57,6 +67,11 @@ export const onCreateNewUser = auth.user().onCreate(async (user) => {
                 },
             },
         };
+
+        const stripeController = new StripeController();
+        await stripeController.createAccount(userProperties, "US");
+        userProperties.immutable.stripe_properties.stripe_id =
+            stripeController.account.id;
 
         await store.collection("stores").doc(user.uid).set(storeProperties);
         return await store
@@ -76,8 +91,12 @@ export const onCreateNewUser = auth.user().onCreate(async (user) => {
  */
 export const onUserDelete = auth.user().onDelete(async (user) => {
     try {
-        await store.collection("stores").doc(user.uid).delete();
+        const userData = await store.collection("users").doc(user.uid).get();
+        await stripe.accounts.del(
+            userData.data()?.immutable.stripe_properties.stripe_id
+        );
 
+        await store.collection("stores").doc(user.uid).delete();
         return await store.collection("users").doc(user.uid).delete();
     } catch (error) {
         logError("[Homebowls-Firebase]: Error deleting user", error);
@@ -113,6 +132,7 @@ export const updateUser = onCall(async (request) => {
         const updatedUser: UserProperties = {
             ...userDataObj,
             ...request.data.updatedProperties,
+            immutable: userDataObj?.immutable, // Keep the immutable properties unchanged
         };
 
         await store.collection("users").doc(request.auth.uid).set(updatedUser);
@@ -120,5 +140,45 @@ export const updateUser = onCall(async (request) => {
     } catch (error) {
         logError("[Homebowls-Firebase]: Error updating user", error);
         return new HttpsError("internal", "Error updating user");
+    }
+});
+
+/**
+ * Generates a Stripe account link for the authenticated user.
+ * @param request - The request object containing the user's authentication information.
+ * @returns The URL of the generated Stripe account link.
+ * @throws {HttpsError} If the user is not authenticated or not found, or if there is an error generating the account link.
+ */
+export const generateStripeAccountLink = onCall(async (request) => {
+    try {
+        if (request.auth === undefined || request.auth.uid === undefined) {
+            throw new HttpsError(
+                "unauthenticated",
+                "User is not authenticated."
+            );
+        }
+
+        const userData = await store
+            .collection("users")
+            .doc(request.auth.uid)
+            .get();
+        if (!userData.exists) {
+            throw new HttpsError("not-found", "User not found.");
+        }
+
+        const userDataObj = userData.data();
+        const user: UserProperties = userDataObj as UserProperties;
+
+        const stripeController = new StripeController();
+        await stripeController.getAccount(
+            user.immutable.stripe_properties.stripe_id
+        );
+
+        const accountLink = await stripeController.generateAccountLink();
+        console.log(accountLink);
+        return accountLink.url;
+    } catch (error) {
+        logError("[Homebowls-Firebase]: Error generating account link", error);
+        return new HttpsError("internal", "Error generating account link");
     }
 });

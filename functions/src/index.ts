@@ -15,7 +15,13 @@ admin.initializeApp();
 
 import { createCustomerPaymentSession, checkoutCompleted } from "./payment";
 import { updateStore } from "./store";
-import { onCreateNewUser, updateUser, onUserDelete } from "./user";
+import {
+    onCreateNewUser,
+    updateUser,
+    onUserDelete,
+    generateStripeAccountLink,
+} from "./user";
+import { webhookEndpoint, webhookConnectEndpoint } from "./stripe";
 
 export {
     createCustomerPaymentSession,
@@ -24,4 +30,7 @@ export {
     onCreateNewUser,
     onUserDelete,
     updateUser,
+    generateStripeAccountLink,
+    webhookConnectEndpoint,
+    webhookEndpoint,
 };

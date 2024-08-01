@@ -13,8 +13,16 @@ export interface SalesAnalytic {
  * Represents a scheduled item.
  */
 export interface ScheduledItem {
+    day: Timestamp;
+    item_id: string;
+}
+
+/**
+ * Represents a routine item.
+ */
+export interface RoutineItem {
     day: number;
-    item: MenuItem;
+    item_id: string;
 }
 
 /**
@@ -165,13 +173,7 @@ export interface StoreProperties {
      * Scheduled items
      */
     schedule: {
-        specialty: {
-            date: Timestamp;
-            item_id: string;
-        }[];
-        routine: {
-            day: number;
-            item_id: string;
-        }[];
-    }
+        specialty: ScheduledItem[];
+        routine: RoutineItem[];
+    };
 }

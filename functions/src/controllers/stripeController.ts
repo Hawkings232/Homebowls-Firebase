@@ -1,9 +1,14 @@
 import Stripe from "stripe";
 import { UserProperties } from "../types/usertypes";
 
-const stripe: Stripe = new Stripe(process.env.STRIPE_SECRET || "", {
-    apiVersion: "2024-06-20",
-});
+export const stripe =
+    process.env.NODE_ENV == "development"
+        ? new Stripe(process.env.STRIPE_TEST_SECRET || "", {
+              apiVersion: "2024-06-20",
+          })
+        : new Stripe(process.env.STRIPE_SECRET || "", {
+              apiVersion: "2024-06-20",
+          });
 
 /*
 export interface StripeExpressAccount {
@@ -14,7 +19,7 @@ export interface StripeExpressAccount {
     payouts_enabled: boolean;
 }*/
 
-class StripeController {
+export class StripeController {
     account: Stripe.Account;
 
     constructor() {
@@ -35,31 +40,52 @@ class StripeController {
                 business_profile: {
                     mcc: "7299",
                     product_description: "Food",
-                    url: "https://homebowls.com/storePage?store_id=" + user.uid,
+                    url:
+                        "https://homebowls.com/storePage?store_id=" +
+                        user.immutable.uid,
                     support_email: user.email,
+                },
+                metadata: {
+                    firebaseUID: user.immutable.uid,
                 },
                 tos_acceptance: {
                     service_agreement: country === "US" ? "full" : "recipient",
                 },
             });
         } catch (error) {
-            console.error(error);
+            console.log(error);
+            throw new Error("Error creating account...");
         }
     }
 
-    async generateAccountLinkURL() {
+    async generateAccountLink() {
         try {
             const accountLink = await stripe.accountLinks.create({
                 account: this.account.id,
-                refresh_url: "https://homebowls.com/refresh",
-                return_url: "https://homebowls.com/return",
+                refresh_url: process.env.NODE_ENV
+                    ? "https://localhost:5173/verify"
+                    : "https://homebowls.com/verify",
+                return_url: process.env.NODE_ENV
+                    ? "https://localhost:5173/verify"
+                    : "https://homebowls.com/return",
                 type: "account_onboarding",
+                collect: "eventually_due",
             });
 
-            return accountLink.url;
+            return accountLink;
         } catch (error) {
-            console.error(error);
+            console.log(error);
+            throw new Error("Error generating account link URL...");
+        }
+    }
+
+    async getAccount(accountId: string) {
+        try {
+            this.account = await stripe.accounts.retrieve(accountId);
+            return this.account;
+        } catch (error) {
+            console.log(error);
+            throw new Error("Error getting account...");
         }
     }
 }
-exports.stripe = stripe;
