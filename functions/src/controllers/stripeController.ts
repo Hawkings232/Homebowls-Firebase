@@ -20,10 +20,10 @@ export interface StripeExpressAccount {
 }*/
 
 export class StripeController {
-    account: Stripe.Account;
+    account: any;
 
     constructor() {
-        this.account = {} as Stripe.Account;
+        this.account = {};
     }
 
     async createAccount(user: UserProperties, country: string) {
@@ -53,7 +53,6 @@ export class StripeController {
                 },
             });
         } catch (error) {
-            console.log(error);
             throw new Error("Error creating account...");
         }
     }
@@ -82,6 +81,7 @@ export class StripeController {
     async getAccount(accountId: string) {
         try {
             this.account = await stripe.accounts.retrieve(accountId);
+            console.log("Account data: " + JSON.stringify(this.account));
             return this.account;
         } catch (error) {
             console.log(error);

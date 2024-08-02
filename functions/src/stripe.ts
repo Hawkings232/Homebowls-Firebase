@@ -1,5 +1,5 @@
 import { firestore } from "firebase-admin";
-import { stripe } from "./controllers/stripeController";
+import { StripeController, stripe } from "./controllers/stripeController";
 import { onRequest } from "firebase-functions/v2/https";
 
 const store = firestore();
@@ -11,15 +11,13 @@ const connectHandlers: Record<string, EventHandler> = {};
 
 connectHandlers["account.updated"] = async (event) => {
     let data = event.data.object;
-    let account = await stripe.accounts.retrieve(data.account);
+    let controller = new StripeController();
+    let account = await controller.getAccount(data.id);
 
-    console.log(account);
     const userData = await store
         .collection("users")
         .doc(account.metadata?.firebaseUID || "")
         .get();
-
-    console.log(account.metadata?.firebaseUID);
 
     if (userData.exists) {
         let user = userData.data();
@@ -28,7 +26,12 @@ connectHandlers["account.updated"] = async (event) => {
                 payouts_enabled: account.payouts_enabled,
                 charges_enabled: account.charges_enabled,
                 details_submitted: account.details_submitted,
+                stripe_id: account.id,
             };
+            await store
+                .collection("users")
+                .doc(account.metadata?.firebaseUID || "")
+                .update(user);
         }
     }
 };
