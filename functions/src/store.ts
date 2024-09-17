@@ -6,12 +6,13 @@ import { StoreProperties } from "./types/storetypes";
 const store = firestore();
 
 async function propertySecurityMeasures(updatedStore: StoreProperties) {
+    /*
     if (updatedStore.salesAnalytics !== undefined) {
         throw new HttpsError(
             "invalid-argument",
             "Cannot update salesAnalytics."
         );
-    }
+    }*/
     /*
     if (updatedStore.menuItems !== undefined) {
         throw new HttpsError("invalid-argument", "Cannot update menuItems.");

@@ -1,5 +1,4 @@
 import { Timestamp } from "firebase-admin/firestore";
-
 /**
  * Represents a sales analytic object.
  */

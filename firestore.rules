@@ -9,7 +9,7 @@ service cloud.firestore {
       allow read;
       allow write: if request.auth != null && request.auth.uid == userId;
     }
-    match /store/{storeid}/{document=**} {
+    match /stores/{storeid}/{document=**} {
     	allow read;
       allow write: if request.auth != null && request.auth.uid == resource.data.owner;
     }

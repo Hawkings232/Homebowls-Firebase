@@ -67,3 +67,7 @@ node_modules/
 
 # Firebase emulator data
 functions/data/
+
+# Shortcuts
+custom-commands.txt
+functions/data/auth_export/accounts.json

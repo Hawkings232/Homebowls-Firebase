@@ -1,4 +1,5 @@
 import { StripeAccountProperties } from "./stripetypes";
+import { MenuItem } from "./storetypes";
 /**
  * Represents the account type of a user.
  */
@@ -59,6 +60,16 @@ export interface UserProperties {
         country: string;
     };
     /**
+     * Customer Fields
+     */
+    customer: {
+        /**
+         * Cart Items of the Customer
+         */
+        cart_items: MenuItem[];
+    };
+
+    /**
      * The settings of the user.
      */
     settings: {
@@ -106,5 +117,10 @@ export interface UserProperties {
          * The Stripe properties of the user (read-only).
          */
         stripe_properties: StripeAccountProperties;
+        /**
+         * CANBENULL
+         * Last Email-Verification Time (read-only).
+         */
+        lastEmailVerification?: number;
     };
 }

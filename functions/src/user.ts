@@ -13,6 +13,7 @@ const store = firestore();
  * @param user The newly created Firebase authentication user.
  * @returns A Promise that resolves when the user is created.
  */
+
 export const onCreateNewUser = auth.user().onCreate(async (user) => {
     try {
         const storeProperties: StoreProperties = {
@@ -46,6 +47,9 @@ export const onCreateNewUser = auth.user().onCreate(async (user) => {
                 zip: "",
                 country: "",
             },
+            customer: {
+                cart_items: [],
+            },
             immutable: {
                 uid: user.uid,
                 stripe_properties: {
@@ -54,6 +58,7 @@ export const onCreateNewUser = auth.user().onCreate(async (user) => {
                     details_submitted: false,
                     payouts_enabled: false,
                 },
+                lastEmailVerification: undefined,
             },
             settings: {
                 fs: {
