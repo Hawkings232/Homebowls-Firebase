@@ -13,24 +13,23 @@ import admin from "firebase-admin";
 
 admin.initializeApp();
 
-import { createCustomerPaymentSession, checkoutCompleted } from "./payment";
-import { updateStore } from "./store";
+// import { createCustomerPaymentSession, checkoutCompleted } from "./payment";
+// import { updateStore } from "./store";
 import {
     onCreateNewUser,
     updateUser,
     onUserDelete,
     generateStripeAccountLink,
 } from "./user";
-import { webhookEndpoint, webhookConnectEndpoint } from "./stripe";
+//import { webhookEndpoint, webhookConnectEndpoint } from "./stripe";
 
+import { joinWaitlist } from "./waitlist";
 export {
-    createCustomerPaymentSession,
-    checkoutCompleted,
-    updateStore,
+    joinWaitlist,
     onCreateNewUser,
-    onUserDelete,
     updateUser,
+    onUserDelete,
     generateStripeAccountLink,
-    webhookConnectEndpoint,
-    webhookEndpoint,
+    //webhookEndpoint,
+    //webhookConnectEndpoint,
 };

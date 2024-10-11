@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { onRequest } from "firebase-functions/v2/https";
 import { log, error as logError } from "firebase-functions/logger";
 import { firestore } from "firebase-admin";
-import { MenuItem } from "./types/storetypes";
+import { MenuItem } from "./@types/storetypes";
 
 const stripe: Stripe = new Stripe(process.env.STRIPE_SECRET || "", {
     apiVersion: "2024-06-20",

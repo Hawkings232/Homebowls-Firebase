@@ -1,24 +1,24 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { error as logError } from "firebase-functions/logger";
 import { firestore } from "firebase-admin";
-import { StoreProperties } from "./types/storetypes";
+import { StoreProperties } from "./@types/storetypes";
 
 const store = firestore();
 
+/*
 async function propertySecurityMeasures(updatedStore: StoreProperties) {
-    /*
     if (updatedStore.salesAnalytics !== undefined) {
         throw new HttpsError(
             "invalid-argument",
             "Cannot update salesAnalytics."
         );
     }*/
-    /*
+/*
     if (updatedStore.menuItems !== undefined) {
         throw new HttpsError("invalid-argument", "Cannot update menuItems.");
     }
-    */
 }
+*/
 
 export const updateStore = onCall(async (request) => {
     try {
@@ -40,7 +40,7 @@ export const updateStore = onCall(async (request) => {
             ...request.data.updatedProperties,
         };
 
-        await propertySecurityMeasures(request.data.updatedProperties);
+        //await propertySecurityMeasures(request.data.updatedProperties);
 
         await store
             .collection("stores")

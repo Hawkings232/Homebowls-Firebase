@@ -8,7 +8,10 @@ export default [
     },
     {
         languageOptions: {
-            globals: globals.browser,
+            globals: {
+                ...globals.browser,
+                process: "readonly",
+            },
         },
     },
     pluginJs.configs.recommended,
@@ -16,11 +19,12 @@ export default [
     {
         rules: {
             "no-undef": "warn",
+            "@typescript-eslint/no-explicit-any": "off"
         },
-    }, 
+    },
     {
         ignores: [
           "lib/*"
         ],
-    }, 
+    },
 ];

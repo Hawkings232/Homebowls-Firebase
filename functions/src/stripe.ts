@@ -1,3 +1,4 @@
+/*
 import { firestore } from "firebase-admin";
 import { StripeController, stripe } from "./controllers/stripeController";
 import { onRequest } from "firebase-functions/v2/https";
@@ -10,9 +11,9 @@ const handlers: Record<string, EventHandler> = {};
 const connectHandlers: Record<string, EventHandler> = {};
 
 connectHandlers["account.updated"] = async (event) => {
-    let data = event.data.object;
-    let controller = new StripeController();
-    let account = await controller.getAccount(data.id);
+    const data = event.data.object;
+    const controller = new StripeController();
+    const account = await controller.getAccount(data.id);
 
     const userData = await store
         .collection("users")
@@ -20,7 +21,7 @@ connectHandlers["account.updated"] = async (event) => {
         .get();
 
     if (userData.exists) {
-        let user = userData.data();
+        const user = userData.data();
         if (user) {
             user.immutable.stripe_properties = {
                 payouts_enabled: account.payouts_enabled,
@@ -86,3 +87,4 @@ export const webhookEndpoint = onRequest(async (request, response) => {
         response.status(400).end();
     }
 });
+*/

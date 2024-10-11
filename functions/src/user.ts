@@ -2,8 +2,8 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { error as logError } from "firebase-functions/logger";
 import { firestore } from "firebase-admin";
 import { auth } from "firebase-functions";
-import { StoreProperties } from "./types/storetypes";
-import { UserProperties, AccountType } from "./types/usertypes";
+import { StoreProperties } from "./@types/storetypes";
+import { UserProperties, AccountType } from "./@types/usertypes";
 import { stripe, StripeController } from "./controllers/stripeController";
 
 const store = firestore();

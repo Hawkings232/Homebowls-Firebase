@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { UserProperties } from "../types/usertypes";
+import { UserProperties } from "../@types/usertypes";
 
 export const stripe =
     process.env.NODE_ENV == "development"
@@ -20,10 +20,10 @@ export interface StripeExpressAccount {
 }*/
 
 export class StripeController {
-    account: any;
+    account: Stripe.Account;
 
     constructor() {
-        this.account = {};
+        this.account = {} as Stripe.Account;
     }
 
     async createAccount(user: UserProperties, country: string) {
