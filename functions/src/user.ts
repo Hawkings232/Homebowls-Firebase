@@ -58,7 +58,7 @@ export const onCreateNewUser = auth.user().onCreate(async (user) => {
                     details_submitted: false,
                     payouts_enabled: false,
                 },
-                lastEmailVerification: undefined,
+                lastEmailVerification: 0,
             },
             settings: {
                 fs: {

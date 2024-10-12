@@ -1,5 +1,7 @@
 {
-  "projects": {
-    "default": "homebowls-85f09"
-  }
+    "projects": {
+        "default": "homebowls-85f09",
+        "dev": "homebowls-85f09",
+        "prod": "homebowls-85f09"
+    }
 }

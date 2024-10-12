@@ -1,4 +1,3 @@
-/*
 import { firestore } from "firebase-admin";
 import { StripeController, stripe } from "./controllers/stripeController";
 import { onRequest } from "firebase-functions/v2/https";
@@ -50,6 +49,7 @@ export const webhookConnectEndpoint = onRequest(async (request, response) => {
             signature as string,
             process.env.STRIPE_LOCAL_ENDPOINT_SECRET || ""
         );
+
         if (connectHandlers[event.type]) {
             await connectHandlers[event.type](event);
             response.status(200).end();
@@ -87,4 +87,3 @@ export const webhookEndpoint = onRequest(async (request, response) => {
         response.status(400).end();
     }
 });
-*/

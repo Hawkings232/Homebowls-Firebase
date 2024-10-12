@@ -21,15 +21,18 @@ import {
     onUserDelete,
     generateStripeAccountLink,
 } from "./user";
-//import { webhookEndpoint, webhookConnectEndpoint } from "./stripe";
+import { webhookEndpoint, webhookConnectEndpoint } from "./stripe";
 
 import { joinWaitlist } from "./waitlist";
+
+console.log(process.env.NODE_ENV);
+
 export {
     joinWaitlist,
     onCreateNewUser,
     updateUser,
     onUserDelete,
     generateStripeAccountLink,
-    //webhookEndpoint,
-    //webhookConnectEndpoint,
+    webhookEndpoint,
+    webhookConnectEndpoint,
 };

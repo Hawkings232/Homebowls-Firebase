@@ -61,12 +61,14 @@ export class StripeController {
         try {
             const accountLink = await stripe.accountLinks.create({
                 account: this.account.id,
-                refresh_url: process.env.NODE_ENV
-                    ? "https://localhost:5173/verify"
-                    : "https://homebowls.com/verify",
-                return_url: process.env.NODE_ENV
-                    ? "https://localhost:5173/verify"
-                    : "https://homebowls.com/return",
+                refresh_url:
+                    process.env.NODE_ENV == "development"
+                        ? "https://localhost:5173/verify"
+                        : "https://homebowls.com/verify",
+                return_url:
+                    process.env.NODE_ENV == "development"
+                        ? "https://localhost:5173/verify"
+                        : "https://homebowls.com/return",
                 type: "account_onboarding",
                 collect: "eventually_due",
             });
