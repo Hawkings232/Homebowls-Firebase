@@ -20,6 +20,7 @@ import {
     updateUser,
     onUserDelete,
     generateStripeAccountLink,
+    setupAccountType,
 } from "./user";
 import { webhookEndpoint, webhookConnectEndpoint } from "./stripe";
 
@@ -33,6 +34,7 @@ export {
     updateUser,
     onUserDelete,
     generateStripeAccountLink,
+    setupAccountType,
     webhookEndpoint,
     webhookConnectEndpoint,
 };

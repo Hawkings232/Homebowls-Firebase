@@ -39,7 +39,6 @@ export const onCreateNewUser = auth.user().onCreate(async (user) => {
         const userProperties: UserProperties = {
             email: user.email || "",
             name: user.displayName || "John Doe",
-            account_type: AccountType.None,
             billing: {
                 address: "",
                 city: "",
@@ -51,9 +50,10 @@ export const onCreateNewUser = auth.user().onCreate(async (user) => {
                 cart_items: [],
             },
             immutable: {
+                account_type: AccountType.None,
                 uid: user.uid,
                 stripe_properties: {
-                    stripe_id: AccountType.None,
+                    stripe_id: "",
                     charges_enabled: false,
                     details_submitted: false,
                     payouts_enabled: false,
@@ -72,11 +72,6 @@ export const onCreateNewUser = auth.user().onCreate(async (user) => {
                 },
             },
         };
-
-        const stripeController = new StripeController();
-        await stripeController.createAccount(userProperties, "US");
-        userProperties.immutable.stripe_properties.stripe_id =
-            stripeController.account.id;
 
         await store.collection("stores").doc(user.uid).set(storeProperties);
         return await store
@@ -136,7 +131,7 @@ export const updateUser = onCall(async (request) => {
         const userDataObj = userData.data();
         const updatedUser: UserProperties = {
             ...userDataObj,
-            ...request.data.updatedProperties,
+            ...(request.data.updatedProperties as UserProperties),
             immutable: userDataObj?.immutable, // Keep the immutable properties unchanged
         };
 
@@ -185,5 +180,55 @@ export const generateStripeAccountLink = onCall(async (request) => {
     } catch (error) {
         logError("[Homebowls-Firebase]: Error generating account link", error);
         return new HttpsError("internal", "Error generating account link");
+    }
+});
+
+export const setupAccountType = onCall(async (request) => {
+    try {
+        if (request.auth === undefined || request.auth.uid === undefined) {
+            throw new HttpsError(
+                "unauthenticated",
+                "User is not authenticated."
+            );
+        }
+
+        const userData = await store
+            .collection("users")
+            .doc(request.auth.uid)
+            .get();
+        if (!userData.exists) {
+            throw new HttpsError("not-found", "User not found.");
+        }
+
+        const userDataObj = userData.data();
+        const user: UserProperties = userDataObj as UserProperties;
+        if (user.immutable.account_type !== AccountType.None) {
+            throw new HttpsError(
+                "already-exists",
+                "User account type already set"
+            );
+        }
+
+        console.log(request.data);
+        const updatedUser: UserProperties = {
+            ...user,
+            immutable: {
+                ...user.immutable,
+                account_type: request.data.updatedProperties.immutable
+                    .account_type as AccountType,
+            },
+        };
+
+        if (updatedUser.immutable.account_type === AccountType.Chef) {
+            const stripeController = new StripeController();
+            await stripeController.createAccount(user, "US");
+            user.immutable.stripe_properties.stripe_id =
+                stripeController.account.id;
+        }
+        await store.collection("users").doc(request.auth.uid).set(updatedUser);
+        return updatedUser;
+    } catch (error) {
+        logError("[Homebowls-Firebase]: Error setting account type", error);
+        return new HttpsError("internal", "Error setting account type");
     }
 });

@@ -31,10 +31,6 @@ export interface UserProperties {
      */
     name: string;
     /**
-     * The account type of the user.
-     */
-    account_type: AccountType;
-    /**
      * The billing information of the user.
      */
     billing: {
@@ -109,6 +105,10 @@ export interface UserProperties {
      * The immutable properties of the user. ON (CLIENT-SIDE)
      */
     immutable: {
+        /**
+         * The account type of the user.
+         */
+        account_type: AccountType;
         /**
          * The unique identifier of the user (read-only).
          */

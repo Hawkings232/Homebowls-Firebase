@@ -66,8 +66,13 @@ node_modules/
 .env
 
 # Firebase emulator data
-functions/data/
+functions/data
 
 # Shortcuts
 custom-commands.txt
 functions/data/auth_export/accounts.json
+firebase-export-**
+auth_export
+firestore_export
+lib
+data/

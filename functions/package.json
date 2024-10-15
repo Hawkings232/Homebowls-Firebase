@@ -5,10 +5,10 @@
         "build": "tsc",
         "build:watch": "tsc --watch",
         "serve": "npm run build && firebase emulators:start --only functions",
-        "emulate": "npm run build && firebase emulators:start --import=data --export-on-exit",
+        "emulate": "firebase use dev && npm run build && firebase emulators:start --import=data --export-on-exit",
         "shell": "npm run build && firebase functions:shell",
         "start": "npm run shell",
-        "deploy": "firebase deploy --only functions",
+        "deploy": "firebase use prod && firebase deploy --only functions",
         "logs": "firebase functions:log"
     },
     "engines": {
