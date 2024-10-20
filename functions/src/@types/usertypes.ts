@@ -19,7 +19,32 @@ export enum AccountType {
 }
 
 /**
- * Represents the properties of a user.
+ * Represents the properties of a user in the system.
+ *
+ * @property {string} email - The email address of the user.
+ * @property {string} name - The name of the user.
+ * @property {Object} billing - The billing information of the user.
+ * @property {string} billing.address - The address of the user.
+ * @property {string} billing.city - The city of the user.
+ * @property {string} billing.state - The state of the user.
+ * @property {string} billing.zip - The ZIP code of the user.
+ * @property {string} billing.country - The country of the user.
+ * @property {Object} customer - Customer-specific fields.
+ * @property {MenuItem[]} customer.cart_items - Cart items of the customer.
+ * @property {Object} settings - The settings of the user.
+ * @property {Object} settings.fs - The file system settings of the user.
+ * @property {string} settings.fs.profile_image_dir - The directory for profile images.
+ * @property {string} settings.fs.cover_image_dir - The directory for cover images.
+ * @property {Object} settings.notifications - The notification settings of the user.
+ * @property {boolean} settings.notifications.orders - Indicates whether order notifications are enabled.
+ * @property {boolean} settings.notifications.feedback - Indicates whether feedback notifications are enabled.
+ * @property {boolean} settings.notifications.promotions - Indicates whether promotions notifications are enabled.
+ * @property {Object} immutable - The immutable properties of the user on the client-side.
+ * @property {boolean} immutable.tos_accepted - Indicates whether the terms of service have been accepted.
+ * @property {AccountType} immutable.account_type - The account type of the user.
+ * @property {string} immutable.uid - The unique identifier of the user (read-only).
+ * @property {StripeAccountProperties} immutable.stripe_properties - The Stripe properties of the user (read-only).
+ * @property {number} [immutable.lastEmailVerification] - The last email verification time (optional, read-only).
  */
 export interface UserProperties {
     /**
@@ -102,9 +127,10 @@ export interface UserProperties {
     };
 
     /**
-     * The immutable properties of the user. ON (CLIENT-SIDE)
+     * The immutable properties of the user on (CLIENT-SIDE)
      */
     immutable: {
+        tos_accepted: boolean;
         /**
          * The account type of the user.
          */

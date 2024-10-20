@@ -50,6 +50,7 @@ export const onCreateNewUser = auth.user().onCreate(async (user) => {
                 cart_items: [],
             },
             immutable: {
+                tos_accepted: false,
                 account_type: AccountType.None,
                 uid: user.uid,
                 stripe_properties: {
@@ -92,9 +93,11 @@ export const onCreateNewUser = auth.user().onCreate(async (user) => {
 export const onUserDelete = auth.user().onDelete(async (user) => {
     try {
         const userData = await store.collection("users").doc(user.uid).get();
-        await stripe.accounts.del(
-            userData.data()?.immutable.stripe_properties.stripe_id
-        );
+        if (userData.data()?.immutable.stripe_properties.stripe_id) {
+            await stripe.accounts.del(
+                userData.data()?.immutable.stripe_properties.stripe_id
+            );
+        }
 
         await store.collection("stores").doc(user.uid).delete();
         return await store.collection("users").doc(user.uid).delete();
@@ -183,7 +186,20 @@ export const generateStripeAccountLink = onCall(async (request) => {
     }
 });
 
-export const setupAccountType = onCall(async (request) => {
+/**
+ * Sets up a user account based on the provided setup type.
+ *
+ * @param request - The request object containing authentication and data.
+ * @returns The updated user properties or an error if the setup fails.
+ *
+ * @throws {HttpsError} If the user is not authenticated.
+ * @throws {HttpsError} If the user is not found.
+ * @throws {HttpsError} If the user account type is already set.
+ * @throws {HttpsError} If required fields are missing in the request data.
+ * @throws {HttpsError} If the setup type is invalid.
+ * @throws {HttpsError} If there is an internal error during account setup.
+ */
+export const setupAccount = onCall(async (request) => {
     try {
         if (request.auth === undefined || request.auth.uid === undefined) {
             throw new HttpsError(
@@ -202,33 +218,67 @@ export const setupAccountType = onCall(async (request) => {
 
         const userDataObj = userData.data();
         const user: UserProperties = userDataObj as UserProperties;
-        if (user.immutable.account_type !== AccountType.None) {
-            throw new HttpsError(
-                "already-exists",
-                "User account type already set"
-            );
-        }
 
         console.log(request.data);
-        const updatedUser: UserProperties = {
-            ...user,
-            immutable: {
-                ...user.immutable,
-                account_type: request.data.updatedProperties.immutable
-                    .account_type as AccountType,
-            },
-        };
-
-        if (updatedUser.immutable.account_type === AccountType.Chef) {
-            const stripeController = new StripeController();
-            await stripeController.createAccount(user, "US");
-            user.immutable.stripe_properties.stripe_id =
-                stripeController.account.id;
+        if (
+            request.data === undefined ||
+            request.data === null ||
+            request.data.type_setup === undefined
+        ) {
+            throw new HttpsError("invalid-argument", "Missing required fields");
         }
-        await store.collection("users").doc(request.auth.uid).set(updatedUser);
-        return updatedUser;
+        if (request.data.type_setup == "account_type") {
+            if (user.immutable.account_type !== AccountType.None) {
+                throw new HttpsError(
+                    "already-exists",
+                    "User account type already set"
+                );
+            }
+            const updatedUser: UserProperties = {
+                ...user,
+                immutable: {
+                    ...user.immutable,
+                    account_type: request.data.updatedProperties.immutable
+                        .account_type as AccountType,
+                },
+            };
+
+            if (updatedUser.immutable.account_type === AccountType.Chef) {
+                const stripeController = new StripeController();
+                await stripeController.createAccount(user, "US");
+                user.immutable.stripe_properties.stripe_id =
+                    stripeController.account.id;
+            }
+            await store
+                .collection("users")
+                .doc(request.auth.uid)
+                .set(updatedUser);
+            return updatedUser;
+        } else if (request.data.type_setup == "tos_agreement") {
+            if (user.immutable.tos_accepted) {
+                throw new HttpsError(
+                    "already-exists",
+                    "User has already accepted the terms of service"
+                );
+            }
+
+            const updatedUser: UserProperties = {
+                ...user,
+                immutable: {
+                    ...user.immutable,
+                    tos_accepted: true,
+                },
+            };
+            await store
+                .collection("users")
+                .doc(request.auth.uid)
+                .set(updatedUser);
+            return updatedUser;
+        }
+
+        return new HttpsError("invalid-argument", "Invalid setup type");
     } catch (error) {
-        logError("[Homebowls-Firebase]: Error setting account type", error);
-        return new HttpsError("internal", "Error setting account type");
+        logError("[Homebowls-Firebase]: Error setting up account", error);
+        return new HttpsError("internal", "Error setting up account");
     }
 });
